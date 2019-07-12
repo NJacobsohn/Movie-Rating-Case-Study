@@ -1,92 +1,93 @@
-# Recommender Case Study on MovieLens dataset
+# Recommender Case Study on MovieLens dataset for the Movies
 
 ### by:
-- Nicholas Jacobsohn,
+- Nicolas Jacobsohn,
 - Greg Noble,
 - Peter Schmeiser,
 - Joe Tustin
 
-"Can we beat the predictive ability of a mean of means in rating this movie dataset.  What is a mean of means?   For all users over all movies, you calculate a global average for all movie ratings on a scale of 0 to five.  Guess what: the average globle rating is 2.5.  Next, you average over all users and then you average over all movies.  We are still at 2.5 (the actual number is: )"  However, some movies are better than others, and some movies are worse than others, and we would not suspect to fill in all values in a sparse matrix with a mean of means.  Based on some similarity comparison, we can do better than this average value becaues we have some 'a priori data vectors' to compare.
-
-Flask app for the win: I like this movie.  These are the next five movies that you should check out ant the dataframe.
-
 ## Table of Contents
-1. [Description of Dataset](#DescriptionofDataset)
-2. [Exploratory Data Analysis](#eda)
-    1. [Dataset](#dataset)
-    2. [Data Cleaning](#cleaning)
-3. [Modelling](#model)
-    1. [ALS](#altleastsquares)
+1. [Introduction](#Introduction)
+2. [Starting Baseline](#StartingBaseline)
+3. [New Proposed Model](#NewProposedModel)
 4. [Conclusions](#conclusions)
+
+## Introduction:
+Can we beat the predictive ability of a mean of means in rating this movie dataset.  What is a mean of means?   For all users over all movies, you calculate a global average for all movie ratings on a scale of 0 to five.  Guess what: the average global rating is 3.54  Next, you average over each user and then you average over each movie.  These user and movie averages are then averaged with the global mean for each data point in the users vs movie data matrix. For example, user1 has a rating average of 2.55 and movie1("Toy Story") has an average rating of 3.87.  So, our matrix element (1,1) would be the mean of these three values, 3.32  However, it would be more meaningful to fill in values giving more weight to users who show similar trends to the user of interest and to give more weight to movie columns that are similar to the movie column of interest.  This new method of averaging takes into account similarity.
+
+## Starting Baseline:
+When you run the existing mean of means recommender model, you get a RMSE (Root Mean Square Error) 1.0173  What does this test metric mean?  For existing recommendations that we have,  the reconstructed recommendation model would be off by a value of 1 on a scale of 0-5 on average for each recommendation that we have in our dataset.  Not that great!!
+Let's do better.
+
+## New Proposed Model:
+Alternating Least Square (ALS) is a matrix factorization algorithm and it runs itself in a parallel fashion. ALS is implemented in Apache Spark ML and built for a larges-scale collaborative filtering problems. ALS is doing a pretty good job at solving scalability and sparseness of the Ratings data, and it’s simple and scales well to very large datasets.
+Some high-level ideas behind ALS are:
+ALS minimizes two loss functions alternatively; It first holds user matrix fixed and runs gradient descent with item matrix; then it holds movie matrix fixed and runs gradient descent with user matrix
+
+![](mat_fact.png)
+
+Its scalability: ALS runs its gradient descent in parallel across multiple partitions of the underlying training data from a cluster of machines.  It is better because....  It is shown to be the best in the table below of various modeling techniques
+
+
+
+**Table 1**: Modeling Methods and results
+
+| Movielens(100k)	| RMSE |	MAE	| Time |
+|---:|-----------:|:-----------------------|----:|
+|SVD|	0.934	|0.737|	0:00:11|
+|SVD++|	0.92|	0.722|	0:09:03|
+|NMF	|0.963|	0.758	|0:00:15|
+|Slope One|	0.946|	0.743	|0:00:08|
+|k-NN|	0.98|	0.774	|0:00:10|
+|Centered k-NN	|0.951|	0.749	|0:00:10|
+|k-NN Baseline	|0.931|	0.733|	0:00:12|
+|Co-Clustering	|0.963|	0.753|	0:00:03|
+|Baseline|	0.944|	0.748	|0:00:01|
+|Random	|1.514|	1.215	|0:00:01|
+|ALS| 0.896|0.696| 0:00:04|
+
+## Results: Example use of recommender
+
+If we look at a random user, let's say User #7:
+The three highest rated movies from this user were:
+Our new model recommends to watch these three movies:
+The old model (mean of means) recommends to watch these three movies:
+
+As another double check on the value of our recommender:
+We averaged the new ratings for all movies and the five highest movies were:
+
+Topic 1 Top 10 Movies:
+Storefront Hitchcock (1997)    Loading Value: 3.24
+Caveman (1981)    Loading Value: 3.24
+Funeral in Berlin (1966)    Loading Value: 3.24
+Dangerous Beauty (1998)    Loading Value: 3.11
+Incendies (2010)    Loading Value: 2.90
+Dylan Moran: Monster (2004)    Loading Value: 2.88
+Excision (2012)    Loading Value: 2.81
+The Lair of the White Worm (1988)    Loading Value: 2.80
+Dead Man's Shoes (2004)    Loading Value: 2.80
+King Is Alive, The (2000)    Loading Value: 2.74
+
+Topic 2 Top 10 Movies:
+Twilight Saga: Breaking Dawn - Part 1, The (2011)    Loading Value: 4.24
+Faust (1926)    Loading Value: 3.39
+Mirror, The (Zerkalo) (1975)    Loading Value: 2.90
+Am Ende eiens viel zu kurzen Tages (Death of a superhero) (2011)    Loading Value: 2.85
+Book Thief, The (2013)    Loading Value: 2.85
+Last Seduction, The (1994)    Loading Value: 2.84
+Psycho II (1983)    Loading Value: 2.83
+Homegrown (1998)    Loading Value: 2.73
+Amityville II: The Possession (1982)    Loading Value: 2.72
+Roger Dodger (2002)    Loading Value: 2.70
+
+
+
+
+
 
 ## Description of Dataset <a name="Description of Dataset"></a>
 
-The MovieLens dataset consists of 100,004 ratings ranging from 0 to 5.  There are 9125 movies in the dataset and 671 unique users.
-
-
-
-
-## Exploratory Data Analysis <a name="eda"></a>
-
-### Dataset <a name="dataset"></a>
-
-The initial dataset consisted of 420,000 reviews.  The dataset was evenly balanced with an equal number of positive and negative reviews.  With random guessing, we would have a baseline predictive ability of 50%.  Let's see if we can do better!
-
-**Table 1**: Initial dataset
-
-|    |   Freshness |   Review |
-|---:|-----------:|:-----------------------|
-|  0 |       1   | Manakamana doesn't answer any questions, yet makes its point: Nepal, like the rest of our planet, is a picturesque but far from peaceable kingdom.   |   
-|  1 |       1   | Wilfully offensive and powered by a chest-thumping machismo, but it's good clean fun.   |
-|  2 |       0   | It would be difficult to imagine material more wrong for Spade than Lost & Found.  |
-|  3 |       0   | Despite the gusto its star brings to the role, it's hard to ride shotgun on Hector's voyage of discovery.   |
-
-
-***CATEGORICAL Data: Target***
-- The target was categorical in nature.  A review is either good or bad and is represented as a one or zero.
-
-
-***NUMERICAL Data: Features (after vectorization)***
-- The string was broken down into a list of strings or tokens.  These words were then counted into numerical data using CountVectorizer.  The feature size of this new representation of the data varied from 10,000 to 110,000 features depending on the use of single words to bigrams.  For modeling purposes, I used 10,000 rows for training purposes and 2,500 rows for test purposes.
-
-### Data Cleaning <a name="cleaning"></a>
-
-CountVectorizer was my workhorse function.  In using this function, I was able to lowercase my data, filter out accents and stop words, set max_features(ie-10,000), and set min_df(ie-2)
-
-***CountVectorizer  (lowercase=True, tokenizer=None, ngram_range=(1,2),strip_accents= "ascii", stop_words='english',
-                             analyzer='word', max_df=1.0, min_df=2,
-                             max_features=10,000)***
-
-The output of the CountVectorizer was a sparse array which was converted to numpy arrays using  the .toarray() method.  This step was needed to get my X_train, X_test, y_train, y_test arrays used for the sklearn models.
-
-
-To explore the data, I made a corpus  and word dictionary followed by a bag of words array (document) for each review.  A graphical representation of the most common words for both positive and negative reviews are shown below:
-
-![](images/most_common_words_pos.png)
-![](images/most_common_words_neg.png)
-
-### Sentiment Analysis <a name="sentimentanalysis"></a>
-
-In a world where we generate 2.5 quintillion (10^18) bytes of data every day, sentiment analysis has become a key tool for making sense of that data. This has allowed companies to get key insights and automate all kinds of processes.
-
-The process of computationally identifying and categorizing opinions expressed in a piece of text, especially in order to determine whether the writer's attitude towards a particular topic, product, etc. is positive, negative, or neutral.  In my sentiment analysis, unigrams, bigrams, and trigrams were evaluated.  The addition of bigrams to unigrams provided a slight improvement in model performance while the use of trigrams caused a slight degradation due to the curse of dimensionality.
-
-In many of the articles referring to sentiment analysis, a plot of the distribution of review lengths for both positive and negative reviews was recommended as a good first step.  My plot for positive and negative reviews is shown below, but unfortunately, no new useful information was found.
-
-![](images/word_count_dist.png)
-
-
-## Modeling <a name="model"></a>
-To model this dataset, several models were considered.  Naive Bayes, Neural Networks(RNN), and Logistic Regression models were all good candidates for Natural Language Processing.  Ultimately, I chose a multinomial Naive Bayes model based on its ease of use and success as seen in previous work.  The Laplacian smoothing coefficient (alpha) was kept at a value of one.  The best predictive result for the model (accuracy) was 74%.  The result was found using a tf-idf matrix converted from the original count vectorization matrix using TfidfTransformer. In this best case model, the max number of features was 50,000, the min_df was 2, and bigrams were used as well as single word features.  The model results improved when switching from count vectorized data to tf-idf data (83% of text-based recommender systems in digital libraries use tf–idf).  The results also improved when switching form single word features to a combination with bigrams.  In both cases, the results improved by about 1.5%.
-
-It’s estimated that different people only agree around 60-65% of the time when judging the sentiment for a particular piece of text.  So... in theory, it is interesting that the result of the model is on this same order.
-
-### Something a little fun! "Thanks for the suggestion Kayla"
-
-
-![](images/word_cloud.png)
-
-
+The small version of the MovieLens dataset consists of 100,004 ratings ranging from 0 to 5.  There are 9125 movies in the dataset and 671 unique users.
 
 
 
