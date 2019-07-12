@@ -1,9 +1,9 @@
 # Recommender Case Study on MovieLens dataset for Movies-Legit
 
 ### by:
-- Nicolas Jacobsohn,
-- Greg Noble,
-- Peter Schmeiser,
+- Nicolas Jacobsohn
+- Greg Noble
+- Peter Schmeiser
 - Joe Tustin
 
 ## Table of Contents
