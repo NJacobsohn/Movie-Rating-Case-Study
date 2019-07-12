@@ -24,7 +24,7 @@ Alternating Least Square (ALS) is a matrix factorization algorithm and it runs i
 Some high-level ideas behind ALS are:
 ALS minimizes two loss functions alternatively; It first holds user matrix fixed and runs gradient descent with item matrix; then it holds movie matrix fixed and runs gradient descent with user matrix
 
-![](mat_fact.png)
+![](img/mat_fact.png)
 
 Its scalability: ALS runs its gradient descent in parallel across multiple partitions of the underlying training data from a cluster of machines.  It is better because....  It is shown to be the best in the table below of various modeling techniques
 
