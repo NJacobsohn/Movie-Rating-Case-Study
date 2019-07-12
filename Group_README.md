@@ -52,7 +52,16 @@ Its scalability: ALS runs its gradient descent in parallel across multiple parti
 
 With the new, proposed Alternating Least Squares model, we see an improvement of 12% over the mean of means model.
 
-Add distribution plots and Add hyper-parameters of model
+ALS Parameters:
+
+    2 Latent Topics 
+    10 Iterations
+    0.1 Lambda 
+    0.01 Learning Rate
+
+![ratings_by_user](img/mean_ratings_by_user.png)
+
+![ratings_by_movie](img/mean_ratings_by_movie.png)
 
 ## Results: Example use of recommender
 
