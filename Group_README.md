@@ -56,6 +56,8 @@ Its scalability: ALS runs its gradient descent in parallel across multiple parti
 
 With the new, proposed Alternating Least Squares model, we see an improvement of 12% over the mean of means model.
 
+![RMSE_latent_topics](img/RMSE_versus_topics.png)
+
 ALS Parameters:
 
     2 Latent Topics 
