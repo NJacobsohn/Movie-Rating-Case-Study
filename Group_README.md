@@ -20,6 +20,10 @@ Can we beat the predictive ability of a mean of means in rating this movie datas
 
 The small version of the MovieLens dataset consists of 100,004 ratings ranging from 0 to 5.  There are 9125 movies in the dataset and 671 unique users.  To be a legitimate user, the user must have rated at least 20 movies.
 
+![ratings_by_user](img/mean_ratings_by_user.png)
+
+![ratings_by_movie](img/mean_ratings_by_movie.png)
+
 ## Starting Baseline:
 When you run the existing mean of means recommender model, you get a RMSE (Root Mean Square Error) 1.0173  What does this test metric mean?  For existing recommendations that we have,  the reconstructed recommendation model would be off by a value of 1 on a scale of 0-5 on average for each recommendation that we have in our dataset.  Not that great!!
 Let's do better.
@@ -58,10 +62,6 @@ ALS Parameters:
     10 Iterations
     0.1 Lambda 
     0.01 Learning Rate
-
-![ratings_by_user](img/mean_ratings_by_user.png)
-
-![ratings_by_movie](img/mean_ratings_by_movie.png)
 
 ## Results: Example use of recommender
 
